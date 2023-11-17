@@ -1,16 +1,14 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class BirdBoundingBox : MonoBehaviour
 {
-    public float width = 0.2f;    // Adjust these values based on the size of your bird
+    public float width = 0.2f;
     public float height = 0.2f;
 
     // Update is called once per frame
     void Update()
     {
-        // Check for collisions with the ground or other objects
+        // Check for collisions with the ground or pipes
         CheckCollision();
     }
 
@@ -20,21 +18,21 @@ public class BirdBoundingBox : MonoBehaviour
         Vector2 currentPosition = transform.position;
 
         // Calculate the half extents of the bounding box
-        Vector2 halfExtents = new Vector2(width / 2f, height / 2f);
+        Vector2 halfExtents = GetHalfExtents();
 
-        // Example: Check for collisions with the ground (assuming ground level is at y = 0)
+        // Check for collisions with the ground
         float groundLevel = -4f;
         if (currentPosition.y - halfExtents.y < groundLevel && currentPosition.y + halfExtents.y > groundLevel)
         {
             HandleCollision();
         }
 
-        // Example: Check for collisions with another object
-        GameObject[] otherObjects = GameObject.FindGameObjectsWithTag("Ground");
-        foreach (GameObject otherObject in otherObjects)
+        // Check for collisions with pipes
+        GameObject[] pipes = GameObject.FindGameObjectsWithTag("Pipe");
+        foreach (GameObject pipe in pipes)
         {
-            BirdBoundingBox otherCollider = otherObject.GetComponent<BirdBoundingBox>();
-            if (otherCollider != null && CheckOverlap(currentPosition, halfExtents, otherObject.transform.position, otherCollider.width, otherCollider.height))
+            BirdBoundingBox pipeCollider = pipe.GetComponent<BirdBoundingBox>();
+            if (pipeCollider != null && CheckOverlap(currentPosition, halfExtents, pipe.transform.position, pipeCollider.width, pipeCollider.height))
             {
                 HandleCollision();
             }
@@ -47,7 +45,7 @@ public class BirdBoundingBox : MonoBehaviour
         float distanceX = Mathf.Abs(posA.x - posB.x);
         float distanceY = Mathf.Abs(posA.y - posB.y);
 
-        float combinedWidth = (sizeA.x + widthB) /2f;
+        float combinedWidth = (sizeA.x + widthB) / 2f;
         float combinedHeight = (sizeA.y + heightB) / 2f;
 
         return distanceX < combinedWidth && distanceY < combinedHeight;
@@ -57,7 +55,10 @@ public class BirdBoundingBox : MonoBehaviour
     {
         // Handle the collision
         Debug.Log("Bird Collision detected!");
-        // Add your logic for what happens when a collision is detected
+
+        // Freeze the game by setting the time scale to 0
+        Time.timeScale = 0;
+        Debug.Log("Game Over!");
     }
 
     public Vector2 GetHalfExtents()
